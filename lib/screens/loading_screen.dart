@@ -11,8 +11,9 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> getWeatherData() async {
-    //api call
-    // status code check 200
+    //Steps:
+    // api call
+    //status code check 200
     //get response body
     //jsonDecode conversion
 
