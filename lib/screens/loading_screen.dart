@@ -1,8 +1,9 @@
-import 'dart:convert';
-
+import 'package:clima_flutter_app/screens/location_screen.dart';
 import 'package:clima_flutter_app/services/location.dart';
+import 'package:clima_flutter_app/services/networking.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
+String apiKey = 'e89bd566819a99dbec331372a8855ae5';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -10,46 +11,41 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  Future<void> getWeatherData() async {
+  Future<void> getLocationWeatherData() async {
     //Steps:
-    // api call
-    //status code check 200
-    //get response body
-    //jsonDecode conversion
+    //http get api call
+    //check response status code  200
+    //jsonDecode conversion of response body
 
-    String _url =
-        'https://samples.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22';
-    http.Response response = await http.get(Uri.parse(_url));
-    //statusCode and body
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
+    Location location = Location();
+    await location.getCurrentLocation();
 
-      print(data["coord"]["lon"]);
-      print(data["weather"][0]["description"]);
+    String weatherAPIUrl =
+        'https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric';
 
-      // id, temp, name
-    } else {
-      print('API request failed');
-    }
+    NetworkHelper networkHelper = NetworkHelper(weatherAPIUrl);
+    var weatherData = await networkHelper.getData();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationScreen(weatherData),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getLocationWeatherData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            // Get the current location
-
-            Location location = Location();
-            await location.getCurrentLocation();
-            print(location.longitude);
-            print(location.latitude);
-
-            getWeatherData();
-          },
-          child: Text('Get Weather'),
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
